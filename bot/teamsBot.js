@@ -5,7 +5,6 @@ const cardTools = require("@microsoft/adaptivecards-tools");
 
 //imports custom projeto
 const TeamsUser = require("./teamsUser");
-//const DialogflowIntegrationButtons = require("./dialogFlow_integration_buttons");
 const SendFiles = require("./sendFiles");
 
 class TeamsBot extends TeamsActivityHandler {
@@ -64,7 +63,7 @@ class TeamsBot extends TeamsActivityHandler {
       if (file) {
         SendFiles.send(context, file, teamsUser);
       } else {
-        //Faz o request para o backend para receber a resposta do dialogflow.
+        //Faz o request para o backend para receber a resposta do QnA.
         var response = await api.post(
           'teams-get-answers/',
           {
