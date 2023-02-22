@@ -2,10 +2,18 @@ const axios = require("axios");
 const { TeamsActivityHandler, CardFactory, TurnContext, ActivityTypes, TeamsInfo, ActionTypes } = require("botbuilder");
 const rawWelcomeCard = require("./adaptiveCards/welcome.json");
 const cardTools = require("@microsoft/adaptivecards-tools");
+const avaliacaoCard = require("./adaptiveCards/avaliacao.json");
+const feedbackCard = require("./adaptiveCards/feedback.json");
+
+const usersInFeedback = new Map()
+
+// or require it
+const AdaptiveCards = require("adaptivecards");
 
 //imports custom projeto
 const TeamsUser = require("./teamsUser");
 const SendFiles = require("./sendFiles");
+const { title } = require("process");
 
 class TeamsBot extends TeamsActivityHandler {
   constructor(conversationReferences) {
@@ -63,59 +71,88 @@ class TeamsBot extends TeamsActivityHandler {
       if (file) {
         SendFiles.send(context, file, teamsUser);
       } else {
-        //Faz o request para o backend para receber a resposta do QnA.
-        var response = await api.post(
-          'teams-get-answers/',
-          {
-            "data": txtFromTeams,
-            "session": teamsUser.userId,
-            "nameUser": teamsUser.userName,
-            "email": teamsUser.userEmail
-          },
-          {
-            headers: {
-              apiKey: 'cGFzc3dvcmQgZGEgYXBpIGRvIHRlYW1zIGRhIGJyYXNpbHByZXY='
-            }
-          }
-        );
+        // verifica se usuário solicitou encerramento de conversa para enviar avaliação "estrelas"
 
-        var txtFromQna = response.data;
+        if (isUserEndingConversation(txtFromTeams)) {
+          // //avaliação
+          var adaptiveCardAvaliacao = new AdaptiveCards.AdaptiveCard();
+          adaptiveCardAvaliacao.parse(avaliacaoCard);
+          usersInFeedback.set(teamsUser.userId, true)
+          await context.sendActivity({ attachments: [CardFactory.adaptiveCard(adaptiveCardAvaliacao)] });
+          // //final avaliação
+          //feedback
+          var adaptiveCard = new AdaptiveCards.AdaptiveCard();
+          adaptiveCard.parse(feedbackCard);
+          usersInFeedback.set(teamsUser.userId, true)
+          await context.sendActivity({ attachments: [CardFactory.adaptiveCard(adaptiveCard)] });
+          //final feedback
+        } else {
+          const isUserInFeedback = usersInFeedback.get(teamsUser.userId)
 
-        //separa botões do restante do texto e guarda as informações.
-        let [text, buttonText] = txtFromQna.split('\n\n\n\n\n');
-        let buttons = [];
-        if (buttonText) {
-          let splitedButtonsText = buttonText.split('\n');
-          for (let splitedButtonText of splitedButtonsText) {
-            const [displayOrder, qnaId, displayText] = splitedButtonText.split(':')
-            if (displayText) {
-              buttons.push({ type: ActionTypes.ImBack, title: displayText, value: displayText })
-
-            }
-
-          }
-        }
-
-        // existem botões? (envia os botões como era no doc 'dialogflow_integration_buttons')
-        if (buttons) {
-          if (buttons.length) {
-            await context.sendActivity({
-              attachments: [CardFactory.heroCard('', undefined,
-                buttons, { text: text })]
-            });
-          } else {
+          if (isUserInFeedback) {
+            // TODO PEGAR A RESPOSTA
+            // TODO ENVIAR PRO BACKEND END
             await context.sendActivity(
-              txtFromQna
+              "Você clicou em: " + context.activity.value
             );
+            usersInFeedback.set(teamsUser.userId, false)
+          } else {
+
+            //Faz o request para o backend para receber a resposta do QnA.
+            var response = await api.post(
+              'teams-get-answers/',
+              {
+                "data": txtFromTeams,
+                "session": teamsUser.userId,
+                "nameUser": teamsUser.userName,
+                "email": teamsUser.userEmail
+              },
+              {
+                headers: {
+                  apiKey: 'cGFzc3dvcmQgZGEgYXBpIGRvIHRlYW1zIGRhIGJyYXNpbHByZXY='
+                }
+              }
+            );
+
+            var txtFromQna = response.data;
+
+            //separa botões do restante do texto e guarda as informações.
+            let [text, buttonText] = txtFromQna.split('\n\n\n\n\n');
+            let buttons = [];
+            if (buttonText) {
+              let splitedButtonsText = buttonText.split('\n');
+              for (let splitedButtonText of splitedButtonsText) {
+                const [displayOrder, qnaId, displayText] = splitedButtonText.split(':')
+                if (displayText) {
+                  buttons.push({ type: ActionTypes.ImBack, title: displayText, value: displayText })
+
+                }
+
+              }
+            }
+
+            // existem botões? (envia os botões como era no doc 'dialogflow_integration_buttons')
+            if (buttons) {
+              if (buttons.length) {
+                await context.sendActivity({
+                  attachments: [CardFactory.heroCard('', undefined,
+                    buttons, { text: text })]
+                });
+              } else {
+                await context.sendActivity(
+                  txtFromQna
+                );
+              }
+            }
           }
         }
-        // By calling next() you ensure that the next BotHandler is run.
       }
       await next();
     });
 
     // Listen to MembersAdded event, view https://docs.microsoft.com/en-us/microsoftteams/platform/resources/bot-v3/bots-notifications for more events
     this.onMembersAdded(async (context, next) => {
+
       const membersAdded = context.activity.membersAdded;
       this.addConversationReference(context.activity);
       for (let cnt = 0; cnt < membersAdded.length; cnt++) {
@@ -134,6 +171,10 @@ class TeamsBot extends TeamsActivityHandler {
     this.conversationReferences[conversationReference.conversation.id] = conversationReference;
   }
 
+}
+
+function isUserEndingConversation(user_input) {
+  return user_input == "Não" || user_input == "não" || user_input == "Encerrar" || user_input == "Finalizar" || user_input == "finalizar" || user_input == "no" || user_input == "encerrar" || user_input == "nao"
 }
 
 module.exports.TeamsBot = TeamsBot;

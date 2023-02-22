@@ -1,0 +1,82 @@
+{
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "type": "AdaptiveCard",
+    "version": "1.0",
+    "body": [
+        {
+            "type": "TextBlock",
+            "size": "medium",
+            "weight": "bolder",
+            "text": " Feedback",
+            "horizontalAlignment": "center",
+            "wrap": true,
+            "style": "heading",
+            "color": "accent",
+            "fontType": "Default"
+        },
+        {
+            "type": "TextBlock",
+            "text": "Insira seu e-mail Atos:",
+            "weight": "bolder",
+            "wrap": true,
+            "spacing": "Medium"
+        },
+        {
+            "type": "Input.Text",
+            "label": "E-mail Atos",
+            "placeholder": "E-mail Atos",
+            "style": "email",
+            "id": "EmailVal"
+        },
+        {
+            "type": "TextBlock",
+            "text": "Escolha uma das opções abaixo:",
+            "weight": "bolder",
+            "wrap": true,
+            "spacing": "Medium"
+        },
+        {
+            "type": "Input.ChoiceSet",
+            "id": "myColor2",
+            "style": "expanded",
+            "label": "Escolha uma das opções abaixo:",
+            "isMultiSelect": false,
+            "value": "1",
+            "choices": [
+                {
+                    "title": "Sugestão",
+                    "value": "1"
+                },
+                {
+                    "title": "Elogio",
+                    "value": "2"
+                },
+                {
+                    "title": "Reclamação",
+                    "value": "3"
+                }
+            ]
+        },
+        {
+            "type": "TextBlock",
+            "text": "Insira seu comentário:",
+            "weight": "bolder",
+            "wrap": true,
+            "spacing": "Medium"
+        },
+        {
+            "type": "Input.Text",
+            "label": "Comentário",
+            "placeholder": "Comentário",
+            "style": "text",
+            "isMultiline": true,
+            "id": "MultiLineVal"
+        }
+    ],
+    "actions": [
+        {
+            "type": "Action.Submit",
+            "title": "Enviar"
+        }
+    ]
+}

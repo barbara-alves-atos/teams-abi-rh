@@ -1,0 +1,59 @@
+{
+    "type": "AdaptiveCard",
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.5",
+    "body": [
+        {
+            "type": "TextBlock",
+            "text": "Antes de sair, por favor, deixe sua avaliação 😊",
+            "wrap": true,
+            "size": "Medium",
+            "weight": "Bolder",
+            "color": "Accent",
+            "fontType": "Default",
+            "horizontalAlignment": "left"
+        },
+        {
+            "type": "ActionSet",
+            "actions": [
+                {
+                    "type": "Action.Submit",
+                    "title": "⭐",
+                    "data": "1",
+                    "associatedInputs": "none",
+                    "id": "star1"
+                },
+                {
+                    "type": "Action.Submit",
+                    "title": "⭐",
+                    "data": "2",
+                    "associatedInputs": "none",
+                    "id": "star2"
+                },
+                {
+                    "type": "Action.Submit",
+                    "title": "⭐",
+                    "data": "3",
+                    "associatedInputs": "none",
+                    "id": "star3"
+                },
+                {
+                    "type": "Action.Submit",
+                    "title": "⭐",
+                    "data": "4",
+                    "associatedInputs": "none",
+                    "id": "star4"
+                },
+                {
+                    "type": "Action.Submit",
+                    "title": "⭐",
+                    "data": "5",
+                    "associatedInputs": "none",
+                    "id": "star5"
+                }
+            ],
+            "spacing": "None",
+            "height": "stretch"
+        }
+    ]
+}
